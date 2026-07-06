@@ -17,7 +17,7 @@ RUN ./gradlew --no-daemon installDist
 FROM eclipse-temurin:21-jre AS runtime
 WORKDIR /app
 RUN useradd -r -u 1001 appuser
-COPY --from=build /app/build/install/shopping-agent-backend/ ./
+COPY --from=build /app/build/install/backend/ ./
 USER appuser
 EXPOSE 8080
-ENTRYPOINT ["./bin/shopping-agent-backend"]
+ENTRYPOINT ["./bin/backend"]

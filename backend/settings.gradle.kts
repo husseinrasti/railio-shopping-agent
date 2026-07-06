@@ -1,4 +1,4 @@
-rootProject.name = "shopping-agent-backend"
+rootProject.name = "backend"
 
 pluginManagement {
     repositories {
