@@ -40,11 +40,12 @@ class JsonCatalogRepository : CatalogRepository {
     override fun findByCategory(category: Category): List<Product> =
         products.filter { it.category == category }
 
-    override fun search(query: String, category: Category?, limit: Int): List<Product> {
+    override fun search(query: String, category: Category?, maxPriceToman: Long?, limit: Int): List<Product> {
         val q = query.trim().lowercase()
         val terms = q.split(Regex("\\s+")).filter { it.isNotBlank() }
         return products.asSequence()
             .filter { category == null || it.category == category }
+            .filter { maxPriceToman == null || it.price.toman <= maxPriceToman }
             .map { it to it.relevance(terms) }
             .filter { (_, score) -> terms.isEmpty() || score > 0 }
             .sortedWith(compareByDescending<Pair<Product, Int>> { it.second }.thenByDescending { it.first.rating })

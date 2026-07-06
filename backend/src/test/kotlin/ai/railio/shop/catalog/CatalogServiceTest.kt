@@ -42,6 +42,15 @@ class CatalogServiceTest {
     }
 
     @Test
+    fun `search filters by max price in Toman`() {
+        val cheap = service.search("", maxPriceToman = 2_000_000, limit = 50)
+        assertTrue(cheap.isNotEmpty())
+        assertTrue(cheap.all { it.price.toman <= 2_000_000 })
+        // A zero/negative cap is treated as "no limit".
+        assertEquals(service.list().size, service.search("", maxPriceToman = 0, limit = 50).size)
+    }
+
+    @Test
     fun `get returns a known product and null for unknown`() {
         assertNotNull(service.get("elec-001"))
         assertNull(service.get("does-not-exist"))

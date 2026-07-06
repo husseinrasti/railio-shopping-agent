@@ -30,10 +30,17 @@ class CatalogService(private val repository: CatalogRepository) {
      *
      * @param query free-text query.
      * @param categorySlug optional category slug filter (resolved leniently).
+     * @param maxPriceToman optional upper price bound in Toman (`null`/`<=0` = no bound).
      * @param limit max results (coerced to `1..50`).
      */
-    fun search(query: String, categorySlug: String? = null, limit: Int = 10): List<Product> {
+    fun search(
+        query: String,
+        categorySlug: String? = null,
+        maxPriceToman: Long? = null,
+        limit: Int = 10,
+    ): List<Product> {
         val category = Category.fromSlug(categorySlug)
-        return repository.search(query, category, limit.coerceIn(1, 50))
+        val priceCap = maxPriceToman?.takeIf { it > 0 }
+        return repository.search(query, category, priceCap, limit.coerceIn(1, 50))
     }
 }

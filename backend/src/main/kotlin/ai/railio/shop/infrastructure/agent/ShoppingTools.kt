@@ -33,12 +33,14 @@ class ShoppingTools(
             "something to buy. The matching products are shown to the user as cards automatically.",
     )
     fun searchProducts(
-        @LLMDescription("What the user is looking for, e.g. 'wireless headphones'.")
+        @LLMDescription("What the user is looking for, e.g. 'wireless headphones'. Use an empty string to list everything.")
         query: String,
         @LLMDescription("Optional category filter: electronics, fashion, home, or books.")
         category: String = "",
+        @LLMDescription("Optional maximum price in Toman. 0 means no limit.")
+        maxPrice: Long = 0,
     ): String {
-        val results = catalog.search(query, category.ifBlank { null })
+        val results = catalog.search(query, category.ifBlank { null }, maxPrice)
         if (results.isNotEmpty()) sink.emit(AgentEvent.ProductCards(results))
         return if (results.isEmpty()) {
             "No products matched '$query'."

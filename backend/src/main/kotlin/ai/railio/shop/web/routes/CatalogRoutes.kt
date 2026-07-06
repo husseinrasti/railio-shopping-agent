@@ -17,11 +17,12 @@ fun Route.catalogRoutes(catalog: CatalogService) {
     get("/api/catalog") {
         val q = call.request.queryParameters["q"]
         val category = call.request.queryParameters["category"]
+        val maxPriceToman = call.request.queryParameters["maxPriceToman"]?.toLongOrNull()
         val limit = call.request.queryParameters["limit"]?.toIntOrNull() ?: 20
-        val products = if (q.isNullOrBlank() && category.isNullOrBlank()) {
+        val products = if (q.isNullOrBlank() && category.isNullOrBlank() && maxPriceToman == null) {
             catalog.list()
         } else {
-            catalog.search(q.orEmpty(), category, limit)
+            catalog.search(q.orEmpty(), category, maxPriceToman, limit)
         }
         call.respond(products.map { it.toResponse() })
     }

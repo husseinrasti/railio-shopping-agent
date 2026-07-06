@@ -27,9 +27,15 @@ interface CatalogRepository {
      *
      * @param query free text; blank matches nothing special (see [limit]).
      * @param category optional filter applied in addition to [query].
+     * @param maxPriceToman optional upper price bound, in Toman; `null` = no bound.
      * @param limit maximum number of results to return.
      */
-    fun search(query: String, category: Category? = null, limit: Int = 10): List<Product>
+    fun search(
+        query: String,
+        category: Category? = null,
+        maxPriceToman: Long? = null,
+        limit: Int = 10,
+    ): List<Product>
 
     /** Returns the distinct categories that currently have at least one product. */
     fun categories(): List<Category>
