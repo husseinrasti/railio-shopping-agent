@@ -44,6 +44,16 @@ sealed interface AgentEvent {
         val message: String,
     ) : AgentEvent
 
+    /**
+     * A behind-the-scenes trace of what the agent is doing (flow steps, model
+     * calls, tool invocations, payment transitions). Rendered in the developer
+     * log panel, not as a chat message.
+     *
+     * @property category one of `flow`, `model`, `tool`, `payment`, `system`.
+     * @property message human-readable detail.
+     */
+    data class Trace(val category: String, val message: String) : AgentEvent
+
     /** A recoverable error surfaced to the user as a chat message. */
     data class Error(val message: String) : AgentEvent
 

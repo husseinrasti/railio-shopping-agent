@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { ChatMessage, MessagePart, PaymentSession } from './types';
+import type { ChatMessage, MessagePart, PaymentSession, TraceEntry } from './types';
 import { streamChat } from './api';
 
 /** Generates a stable client-side id. */
@@ -21,6 +21,7 @@ interface ChatStore {
   messages: ChatMessage[];
   sessionId: string | null;
   isStreaming: boolean;
+  traces: TraceEntry[];
 
   sendMessage: (text: string) => Promise<void>;
   applyPaymentSession: (messageId: string, session: PaymentSession) => void;
@@ -31,6 +32,7 @@ export const useChatStore = create<ChatStore>((set, get) => ({
   messages: [],
   sessionId: null,
   isStreaming: false,
+  traces: [],
 
   async sendMessage(text: string) {
     if (get().isStreaming || !text.trim()) return;
@@ -90,6 +92,14 @@ export const useChatStore = create<ChatStore>((set, get) => ({
               { kind: 'payment_result', success: event.success, message: event.message },
             ]);
             break;
+          case 'trace':
+            set((s) => ({
+              traces: [
+                ...s.traces,
+                { id: uid(), category: event.category, message: event.message, ts: event.ts },
+              ].slice(-200),
+            }));
+            break;
           case 'error':
             patch((parts) => [...parts, { kind: 'text', text: `⚠️ ${event.message}` }]);
             break;
@@ -141,6 +151,6 @@ export const useChatStore = create<ChatStore>((set, get) => ({
   reset() {
     activeController?.abort();
     activeController = null;
-    set({ messages: [], sessionId: null, isStreaming: false });
+    set({ messages: [], sessionId: null, isStreaming: false, traces: [] });
   },
 }));

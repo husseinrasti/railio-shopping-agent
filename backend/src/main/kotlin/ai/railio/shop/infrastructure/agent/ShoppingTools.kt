@@ -40,7 +40,10 @@ class ShoppingTools(
         @LLMDescription("Optional maximum price in Toman. 0 means no limit.")
         maxPrice: Long = 0,
     ): String {
+        val cap = if (maxPrice > 0) ", maxPrice=$maxPrice" else ""
+        trace("searchProducts(query='$query'${category.ifBlank { "" }.let { if (it.isBlank()) "" else ", category='$it'" }}$cap)")
         val results = catalog.search(query, category.ifBlank { null }, maxPrice)
+        trace("→ ${results.size} product(s) matched")
         if (results.isNotEmpty()) sink.emit(AgentEvent.ProductCards(results))
         return if (results.isEmpty()) {
             "No products matched '$query'."
@@ -51,8 +54,10 @@ class ShoppingTools(
 
     @Tool
     @LLMDescription("List the available product categories in the store.")
-    fun listCategories(): String =
-        "Categories: " + catalog.categories().joinToString(", ") { it.displayName }
+    fun listCategories(): String {
+        trace("listCategories()")
+        return "Categories: " + catalog.categories().joinToString(", ") { it.displayName }
+    }
 
     @Tool
     @LLMDescription("Get full details for one product by its id. Shows the product card to the user.")
@@ -60,6 +65,7 @@ class ShoppingTools(
         @LLMDescription("The product id, e.g. 'elec-001'.")
         productId: String,
     ): String {
+        trace("getProduct('$productId')")
         val product = catalog.get(productId) ?: return "No product with id '$productId'."
         sink.emit(AgentEvent.ProductCards(listOf(product)))
         return product.forModel()
@@ -74,7 +80,9 @@ class ShoppingTools(
         @LLMDescription("The id of the product to buy, e.g. 'elec-001'.")
         productId: String,
     ): String = runCatching {
+        trace("startCheckout('$productId')")
         val session = payments.startCheckout(productId)
+        trace("→ payment session ${session.id} created (${session.state})", "payment")
         sink.emit(
             AgentEvent.PaymentForm(
                 sessionId = session.id,
@@ -107,7 +115,9 @@ class ShoppingTools(
         @LLMDescription("The one-time password sent to the cardholder.") otp: String,
     ): String {
         return runCatching {
+            trace("submitOtp(session=$sessionId)", "payment")
             val session = payments.submitOtp(sessionId, otp)
+            trace("→ payment ${session.state}", "payment")
             val success = session.state.name == "SUCCESS"
             sink.emit(
                 AgentEvent.PaymentResult(
@@ -121,10 +131,17 @@ class ShoppingTools(
         }.getOrElse { it.toToolMessage() }
     }
 
+    /** Emits a behind-the-scenes trace line for the developer log panel. */
+    private fun trace(message: String, category: String = "tool") {
+        sink.emit(AgentEvent.Trace(category, message))
+    }
+
     /** Runs a payment step and re-emits the next [AgentEvent.PaymentForm]. */
     private inline fun advance(sessionId: String, step: () -> Unit): String = runCatching {
+        trace("submitCardDetails(session=$sessionId)", "payment")
         step()
         val session = payments.get(sessionId) ?: throw PaymentException("Unknown session '$sessionId'.")
+        trace("→ payment ${session.state}", "payment")
         sink.emit(
             AgentEvent.PaymentForm(
                 sessionId = session.id,

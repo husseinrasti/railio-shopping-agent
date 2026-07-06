@@ -17,7 +17,7 @@ export function ChatWindow() {
   }, [messages, isStreaming]);
 
   return (
-    <div className="mx-auto flex h-[100dvh] w-full max-w-2xl flex-col overflow-hidden bg-slate-50">
+    <div className="mx-auto flex h-full w-full max-w-2xl flex-col overflow-hidden bg-slate-50">
       <header className="flex items-center justify-between border-b border-slate-200 bg-white px-4 py-3">
         <div className="flex items-center gap-2">
           <span className="grid h-8 w-8 place-items-center rounded-lg bg-brand text-sm font-bold text-white">

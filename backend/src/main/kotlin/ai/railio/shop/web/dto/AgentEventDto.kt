@@ -40,6 +40,10 @@ sealed interface AgentEventDto {
     ) : AgentEventDto
 
     @Serializable
+    @SerialName("trace")
+    data class Trace(val category: String, val message: String, val ts: Long) : AgentEventDto
+
+    @Serializable
     @SerialName("error")
     data class Error(val message: String) : AgentEventDto
 
@@ -61,6 +65,7 @@ fun AgentEvent.toDto(): AgentEventDto = when (this) {
         maskedCard = maskedCard,
     )
     is AgentEvent.PaymentResult -> AgentEventDto.PaymentResult(sessionId, success, message)
+    is AgentEvent.Trace -> AgentEventDto.Trace(category, message, System.currentTimeMillis())
     is AgentEvent.Error -> AgentEventDto.Error(message)
     AgentEvent.Done -> AgentEventDto.Done
 }

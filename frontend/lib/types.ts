@@ -37,8 +37,20 @@ export type AgentEvent =
       maskedCard?: string | null;
     }
   | { type: 'payment_result'; sessionId: string; success: boolean; message: string }
+  | { type: 'trace'; category: TraceCategory; message: string; ts: number }
   | { type: 'error'; message: string }
   | { type: 'done' };
+
+/** Category of a behind-the-scenes trace line, used for icon/colour. */
+export type TraceCategory = 'flow' | 'model' | 'tool' | 'payment' | 'system';
+
+/** A rendered trace entry in the developer log panel. */
+export interface TraceEntry {
+  id: string;
+  category: TraceCategory;
+  message: string;
+  ts: number;
+}
 
 /** A payment session snapshot returned by REST payment endpoints. */
 export interface PaymentSession {

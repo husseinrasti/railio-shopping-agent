@@ -32,22 +32,27 @@ class OllamaModelManager(private val config: AppConfig) {
         .build()
 
     /**
-     * Requests Ollama to unload [model] from memory. Best-effort: failures are
-     * logged and swallowed so they never affect the user's response.
+     * Requests Ollama to unload [model] from memory (keep_alive=0). Best-effort:
+     * failures are logged and swallowed so they never affect the user's response.
+     *
+     * @return `true` if Ollama accepted the unload request, `false` otherwise.
      */
-    suspend fun unload(model: String) = withContext(Dispatchers.IO) {
+    suspend fun unload(model: String): Boolean = withContext(Dispatchers.IO) {
         val body = """{"model":${model.jsonString()},"keep_alive":0}"""
         val request = HttpRequest.newBuilder()
             .uri(URI.create("${config.ollamaBaseUrl.trimEnd('/')}/api/generate"))
-            .timeout(Duration.ofSeconds(5))
+            .timeout(Duration.ofSeconds(15))
             .header("Content-Type", "application/json")
             .POST(HttpRequest.BodyPublishers.ofString(body))
             .build()
         runCatching {
-            http.send(request, HttpResponse.BodyHandlers.discarding())
-            log.info("Requested Ollama to unload model '{}'", model)
-        }.onFailure { log.debug("Model unload request failed (ignored): {}", it.message) }
-        Unit
+            val status = http.send(request, HttpResponse.BodyHandlers.discarding()).statusCode()
+            log.info("Unload requested for model '{}' (HTTP {})", model, status)
+            status in 200..299
+        }.getOrElse {
+            log.warn("Model unload request failed: {}", it.message)
+            false
+        }
     }
 
     /** Minimal JSON string escaping for the model id. */

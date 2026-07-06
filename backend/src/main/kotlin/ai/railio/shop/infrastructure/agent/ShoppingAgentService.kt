@@ -11,8 +11,10 @@ import ai.railio.shop.infrastructure.config.AppConfig
 import ai.railio.shop.infrastructure.config.LlmProvider
 import ai.koog.agents.core.agent.AIAgent
 import ai.koog.agents.core.tools.ToolRegistry
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.buffer
 import kotlinx.coroutines.flow.channelFlow
@@ -53,6 +55,7 @@ class ShoppingAgentService(
     override fun chat(sessionId: String, userMessage: String): Flow<AgentEvent> = channelFlow {
         val sink = AgentEventSink(channel)
         try {
+            sink.emit(AgentEvent.Trace("flow", "Turn started: \"$userMessage\""))
             val tools = ShoppingTools(catalog, payments, sink)
             val agent = AIAgent(
                 promptExecutor = executorFactory.executor(),
@@ -63,7 +66,9 @@ class ShoppingAgentService(
                 maxIterations = 12,
             )
 
+            sink.emit(AgentEvent.Trace("model", "Prompting ${config.llmModel} (${config.llmProvider.id})…"))
             val reply = agent.run(userMessage)
+            sink.emit(AgentEvent.Trace("model", "Model output: ${reply.trim().take(600)}"))
 
             // Some local models (e.g. coder variants) emit a tool call as raw JSON text
             // instead of using the native tool protocol. Detect that, run the tool
@@ -83,11 +88,15 @@ class ShoppingAgentService(
                     ChatMessage(ChatRole.ASSISTANT, finalText),
                 ),
             )
+            sink.emit(AgentEvent.Trace("flow", "Turn complete"))
         } catch (t: Throwable) {
+            sink.emit(AgentEvent.Trace("system", "Error: ${t.message ?: "unknown error"}"))
             channel.send(AgentEvent.Error("Sorry — I hit a problem: ${t.message ?: "unknown error"}."))
         } finally {
             channel.send(AgentEvent.Done)
-            releaseModel()
+            // Run the release even if the client just disconnected (which cancels this
+            // coroutine): a plain suspend call in `finally` would be skipped otherwise.
+            withContext(NonCancellable) { releaseModel(sink) }
         }
     }.buffer(Channel.UNLIMITED)
 
@@ -96,9 +105,10 @@ class ShoppingAgentService(
      * Only meaningful for Ollama; a no-op for cloud providers. Trades a slower
      * next request (model reload) for a smaller idle memory footprint.
      */
-    private suspend fun releaseModel() {
+    private suspend fun releaseModel(sink: AgentEventSink) {
         if (config.llmProvider == LlmProvider.OLLAMA && config.unloadModelAfterResponse) {
-            modelManager.unload(config.llmModel)
+            val released = modelManager.unload(config.llmModel)
+            if (released) sink.emit(AgentEvent.Trace("system", "Released ${config.llmModel} from memory"))
         }
     }
 
