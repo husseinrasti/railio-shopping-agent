@@ -1,16 +1,8 @@
-import type { AgentEvent, PaymentSession, PaymentState } from './types';
+import type { AgentEvent, PaymentSession } from './types';
 
 /** Backend base URL, configurable at build/run time. */
 export const API_URL =
   process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, '') || 'http://localhost:8080';
-
-/** Maps a payment state to the REST step slug used to advance it. */
-export const stepForState: Partial<Record<PaymentState, string>> = {
-  AWAITING_CARD: 'card',
-  AWAITING_EXPIRY: 'expiry',
-  AWAITING_CVV2: 'cvv2',
-  AWAITING_OTP: 'otp',
-};
 
 /**
  * Streams a chat turn. POSTs the message and yields each parsed {@link AgentEvent}
@@ -66,18 +58,26 @@ export async function* streamChat(
   }
 }
 
-/** Submits one payment step and returns the updated session. */
-export async function submitPaymentStep(
+/** Submits card number, expiry and CVV2 together; provider then issues the OTP. */
+export async function submitCardDetails(
   sessionId: string,
-  step: string,
-  value: string,
+  details: { cardNumber: string; expiry: string; cvv2: string },
 ): Promise<PaymentSession> {
-  const res = await fetch(`${API_URL}/api/payment/${sessionId}/${step}`, {
+  return postPayment(`${sessionId}/card-details`, details);
+}
+
+/** Submits the OTP to complete (or fail) the payment. */
+export async function submitOtp(sessionId: string, otp: string): Promise<PaymentSession> {
+  return postPayment(`${sessionId}/otp`, { value: otp });
+}
+
+async function postPayment(path: string, body: unknown): Promise<PaymentSession> {
+  const res = await fetch(`${API_URL}/api/payment/${path}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ value }),
+    body: JSON.stringify(body),
   });
-  const body = await res.json();
-  if (!res.ok) throw new Error(body?.error ?? 'Payment step failed');
-  return body as PaymentSession;
+  const data = await res.json();
+  if (!res.ok) throw new Error(data?.error ?? 'Payment request failed');
+  return data as PaymentSession;
 }

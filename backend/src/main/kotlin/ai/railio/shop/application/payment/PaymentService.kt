@@ -35,17 +35,13 @@ class PaymentService(
     /** Current session snapshot, or `null`. */
     fun get(sessionId: String): PaymentSession? = provider.get(sessionId)
 
-    /** Submits the card number step. */
-    fun submitCard(sessionId: String, cardNumber: String): PaymentSession =
-        provider.setCardNumber(sessionId, cardNumber)
-
-    /** Submits the expiry step. */
-    fun submitExpiry(sessionId: String, expiry: String): PaymentSession =
-        provider.setExpiry(sessionId, expiry)
-
-    /** Submits the CVV2 step (triggers OTP issuance). */
-    fun submitCvv2(sessionId: String, cvv2: String): PaymentSession =
-        provider.setCvv2(sessionId, cvv2)
+    /** Submits card number, expiry and CVV2 together; triggers OTP issuance. */
+    fun submitCardDetails(
+        sessionId: String,
+        cardNumber: String,
+        expiry: String,
+        cvv2: String,
+    ): PaymentSession = provider.submitCardDetails(sessionId, cardNumber, expiry, cvv2)
 
     /** Verifies the OTP, completing or failing the payment. */
     fun submitOtp(sessionId: String, otp: String): PaymentSession =

@@ -84,30 +84,21 @@ class ShoppingTools(
                 maskedCard = session.maskedCard,
             ),
         )
-        "Checkout started. Payment session '${session.id}' is awaiting the card number. " +
+        "Checkout started. Payment session '${session.id}' is awaiting the card details. " +
             "A secure card form has been shown to the user."
     }.getOrElse { it.toToolMessage() }
 
     @Tool
-    @LLMDescription("Submit the 16-digit card number for a payment session.")
-    fun submitCardNumber(
+    @LLMDescription(
+        "Submit the card number, expiry (MM/YY) and CVV2 together for a payment session. " +
+            "This triggers the OTP being sent to the cardholder.",
+    )
+    fun submitCardDetails(
         @LLMDescription("The payment session id from startCheckout.") sessionId: String,
         @LLMDescription("The 16-digit card number.") cardNumber: String,
-    ): String = advance(sessionId) { payments.submitCard(sessionId, cardNumber) }
-
-    @Tool
-    @LLMDescription("Submit the card expiry (MM/YY) for a payment session.")
-    fun submitExpiry(
-        @LLMDescription("The payment session id.") sessionId: String,
         @LLMDescription("Expiry date in MM/YY format.") expiry: String,
-    ): String = advance(sessionId) { payments.submitExpiry(sessionId, expiry) }
-
-    @Tool
-    @LLMDescription("Submit the CVV2 for a payment session. Triggers the OTP being sent.")
-    fun submitCvv2(
-        @LLMDescription("The payment session id.") sessionId: String,
         @LLMDescription("The 3 or 4 digit CVV2.") cvv2: String,
-    ): String = advance(sessionId) { payments.submitCvv2(sessionId, cvv2) }
+    ): String = advance(sessionId) { payments.submitCardDetails(sessionId, cardNumber, expiry, cvv2) }
 
     @Tool
     @LLMDescription("Submit the OTP to complete a payment session.")

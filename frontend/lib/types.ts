@@ -18,9 +18,7 @@ export interface Product {
 
 /** Payment lifecycle states, mirroring the backend PaymentState enum. */
 export type PaymentState =
-  | 'AWAITING_CARD'
-  | 'AWAITING_EXPIRY'
-  | 'AWAITING_CVV2'
+  | 'AWAITING_CARD_DETAILS'
   | 'AWAITING_OTP'
   | 'SUCCESS'
   | 'FAILED';

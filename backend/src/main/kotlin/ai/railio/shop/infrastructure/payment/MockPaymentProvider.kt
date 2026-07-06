@@ -13,7 +13,8 @@ import java.util.concurrent.ConcurrentHashMap
 /**
  * In-memory mock of an Iranian card PSP (Shaparak/IPG-style).
  *
- * Simulates the real hosted-card sequence — card → expiry → CVV2 → OTP — but
+ * Simulates the real hosted-card sequence — card details (number + expiry +
+ * CVV2) submitted together, then OTP verification — but
  * keeps everything local and issues a fixed OTP (from [AppConfig.mockOtp],
  * default `12345`). Sensitive inputs are validated and held only in a transient
  * server-side record; only a masked PAN ever leaves the provider.
@@ -22,8 +23,9 @@ import java.util.concurrent.ConcurrentHashMap
  * A production adapter implements the same [PaymentProvider] interface. The
  * mapping is direct:
  * - `createPayment` → create a transaction / obtain a gateway token.
- * - `setCardNumber`/`setExpiry`/`setCvv2` → collected on the bank's hosted page
- *   (never touch your server in a real PCI flow) or via a tokenization SDK.
+ * - `submitCardDetails` → card number, expiry and CVV2 are collected together on
+ *   the bank's hosted page (never touching your server in a real PCI flow) or via
+ *   a tokenization SDK.
  * - `requestOtp` → the bank sends the OTP over SMS.
  * - `verifyOtp` → submit the OTP to the gateway to capture the transaction.
  *
@@ -50,7 +52,7 @@ class MockPaymentProvider(config: AppConfig) : PaymentProvider {
             id = UUID.randomUUID().toString(),
             orderId = orderId,
             amount = amount,
-            state = PaymentState.AWAITING_CARD,
+            state = PaymentState.AWAITING_CARD_DETAILS,
         )
         records[session.id] = Record(session)
         return session
@@ -58,43 +60,31 @@ class MockPaymentProvider(config: AppConfig) : PaymentProvider {
 
     override fun get(sessionId: String): PaymentSession? = records[sessionId]?.session
 
-    override fun setCardNumber(sessionId: String, cardNumber: String): PaymentSession {
-        val rec = require(sessionId, PaymentState.AWAITING_CARD)
-        val digits = cardNumber.filter { it.isDigit() }
-        if (digits.length != 16) throw PaymentException("Card number must be 16 digits.")
-        if (!luhnValid(digits)) throw PaymentException("Card number failed the checksum check.")
-        val updated = rec.copy(
-            session = rec.session.copy(state = PaymentState.AWAITING_EXPIRY, maskedCard = mask(digits)),
-            cardNumber = digits,
-        )
-        records[sessionId] = updated
-        return updated.session
-    }
+    override fun submitCardDetails(
+        sessionId: String,
+        cardNumber: String,
+        expiry: String,
+        cvv2: String,
+    ): PaymentSession {
+        val rec = require(sessionId, PaymentState.AWAITING_CARD_DETAILS)
 
-    override fun setExpiry(sessionId: String, expiry: String): PaymentSession {
-        val rec = require(sessionId, PaymentState.AWAITING_EXPIRY)
-        val normalized = expiry.trim()
-        if (!EXPIRY_REGEX.matches(normalized)) {
-            throw PaymentException("Expiry must be in MM/YY format.")
-        }
-        val month = normalized.substringBefore('/').toInt()
-        if (month !in 1..12) throw PaymentException("Expiry month must be between 01 and 12.")
-        val updated = rec.copy(
-            session = rec.session.copy(state = PaymentState.AWAITING_CVV2),
-            expiry = normalized,
-        )
-        records[sessionId] = updated
-        return updated.session
-    }
+        val pan = cardNumber.filter { it.isDigit() }
+        if (pan.length != 16) throw PaymentException("Card number must be 16 digits.")
+        if (!luhnValid(pan)) throw PaymentException("Card number failed the checksum check.")
 
-    override fun setCvv2(sessionId: String, cvv2: String): PaymentSession {
-        val rec = require(sessionId, PaymentState.AWAITING_CVV2)
-        val digits = cvv2.filter { it.isDigit() }
-        if (digits.length !in 3..4) throw PaymentException("CVV2 must be 3 or 4 digits.")
+        val exp = expiry.trim()
+        if (!EXPIRY_REGEX.matches(exp)) throw PaymentException("Expiry must be in MM/YY format.")
+
+        val cvv = cvv2.filter { it.isDigit() }
+        if (cvv.length !in 3..4) throw PaymentException("CVV2 must be 3 or 4 digits.")
+
+        // Details accepted → the bank "sends" the OTP over SMS.
         val updated = rec.copy(
-            session = rec.session.copy(state = PaymentState.AWAITING_OTP),
-            cvv2 = digits,
-            otpIssued = true, // the bank "sends" the OTP as soon as CVV2 is accepted
+            session = rec.session.copy(state = PaymentState.AWAITING_OTP, maskedCard = mask(pan)),
+            cardNumber = pan,
+            expiry = exp,
+            cvv2 = cvv,
+            otpIssued = true,
         )
         records[sessionId] = updated
         return updated.session

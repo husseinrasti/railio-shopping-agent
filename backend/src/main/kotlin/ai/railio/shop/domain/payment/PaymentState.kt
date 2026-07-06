@@ -3,21 +3,19 @@ package ai.railio.shop.domain.payment
 /**
  * Lifecycle states of an Iranian card payment.
  *
- * The flow mirrors a real Shaparak/IPG-style transaction, collected step by
- * step: card number → expiry → CVV2 → OTP verification. Each state names the
- * single piece of information the provider is currently waiting for.
+ * The flow mirrors a real Shaparak/IPG-style transaction: the cardholder enters
+ * the card number, expiry and CVV2 together on the bank page; the bank then
+ * issues an OTP over SMS, which is entered to complete the payment.
+ *
+ * ```
+ * create → AWAITING_CARD_DETAILS → (OTP issued) → AWAITING_OTP → SUCCESS | FAILED
+ * ```
  */
 enum class PaymentState {
-    /** Session created; waiting for the 16-digit card number (PAN). */
-    AWAITING_CARD,
+    /** Session created; waiting for card number + expiry + CVV2 (submitted together). */
+    AWAITING_CARD_DETAILS,
 
-    /** Card accepted; waiting for the card expiry (MM/YY). */
-    AWAITING_EXPIRY,
-
-    /** Expiry accepted; waiting for the CVV2 (3–4 digits). */
-    AWAITING_CVV2,
-
-    /** CVV2 accepted and an OTP has been issued; waiting for OTP entry. */
+    /** Card details accepted and an OTP has been issued; waiting for OTP entry. */
     AWAITING_OTP,
 
     /** OTP verified; payment captured successfully. Terminal. */

@@ -16,6 +16,10 @@ import kotlinx.serialization.Serializable
 @Serializable
 private data class CheckoutRequest(val productId: String)
 
+/** Body for the combined card-details step. */
+@Serializable
+private data class CardDetailsRequest(val cardNumber: String, val expiry: String, val cvv2: String)
+
 /**
  * REST endpoints that drive the Iranian card payment flow directly from the UI
  * form. Each step advances the [PaymentService] state machine and returns the
@@ -41,16 +45,19 @@ fun Route.paymentRoutes(payments: PaymentService) {
         }
     }
 
-    // POST /api/payment/{sessionId}/{step} — submit one step (card|expiry|cvv2|otp).
+    // POST /api/payment/{sessionId}/card-details — submit card number, expiry and CVV2 together.
+    post("/api/payment/{sessionId}/card-details") {
+        val id = call.parameters["sessionId"].orEmpty()
+        val req = call.receive<CardDetailsRequest>()
+        call.respond(payments.submitCardDetails(id, req.cardNumber, req.expiry, req.cvv2).toResponse())
+    }
+
+    // POST /api/payment/{sessionId}/{step} — submit the OTP, or resend it.
     post("/api/payment/{sessionId}/{step}") {
         val id = call.parameters["sessionId"].orEmpty()
         val step = call.parameters["step"].orEmpty()
-        val value = call.receive<PaymentStepRequest>().value
         val session = when (step) {
-            "card" -> payments.submitCard(id, value)
-            "expiry" -> payments.submitExpiry(id, value)
-            "cvv2" -> payments.submitCvv2(id, value)
-            "otp" -> payments.submitOtp(id, value)
+            "otp" -> payments.submitOtp(id, call.receive<PaymentStepRequest>().value)
             "resend-otp" -> payments.resendOtp(id)
             else -> throw PaymentException("Unknown payment step '$step'.")
         }

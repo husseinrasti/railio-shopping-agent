@@ -16,9 +16,11 @@ function form(state: PaymentState): Extract<AgentEvent, { type: 'payment_form' }
 }
 
 describe('PaymentForm', () => {
-  it('shows the card step first', () => {
-    render(<PaymentForm form={form('AWAITING_CARD')} messageId="m1" />);
+  it('shows the combined card-details step first (number, expiry, CVV2)', () => {
+    render(<PaymentForm form={form('AWAITING_CARD_DETAILS')} messageId="m1" />);
     expect(screen.getByText('Card number')).toBeInTheDocument();
+    expect(screen.getByText(/expiry/i)).toBeInTheDocument();
+    expect(screen.getByText('CVV2')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /continue/i })).toBeInTheDocument();
   });
 

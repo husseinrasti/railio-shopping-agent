@@ -1,7 +1,7 @@
 # Railio Shopping Agent
 
 A chat-first AI shopping assistant. Users browse a product catalog and check out
-through a simulated Iranian card flow (**Card → Expiry → CVV2 → OTP**) — all inside
+through a simulated Iranian card flow (**Card details → OTP**, mirroring a real PSP) — all inside
 a streaming chat with inline **product cards** and **payment forms**.
 
 - **Backend** — Kotlin + Ktor + [Koog](https://docs.koog.ai) tool-based agent, Koin DI.
@@ -122,9 +122,11 @@ so subsequent starts are fast.
 | GET    | `/api/catalog/{id}`                | Product by id |
 | GET    | `/api/categories`                  | Categories |
 | POST   | `/api/chat`                        | Chat turn → SSE stream (body: `{sessionId, message}`) |
-| POST   | `/api/payment/checkout`            | Start checkout (body: `{productId}`) |
-| GET    | `/api/payment/{sessionId}`         | Payment session state |
-| POST   | `/api/payment/{sessionId}/{step}`  | Submit `card` \| `expiry` \| `cvv2` \| `otp` \| `resend-otp` (body: `{value}`) |
+| POST   | `/api/payment/checkout`               | Start checkout (body: `{productId}`) |
+| GET    | `/api/payment/{sessionId}`            | Payment session state |
+| POST   | `/api/payment/{sessionId}/card-details` | Submit card number, expiry and CVV2 together (body: `{cardNumber, expiry, cvv2}`) → issues OTP |
+| POST   | `/api/payment/{sessionId}/otp`        | Submit the OTP (body: `{value}`) → success/failure |
+| POST   | `/api/payment/{sessionId}/resend-otp` | Re-issue the OTP |
 
 **Chat SSE events** (each `data:` line is JSON with a `type` field):
 `token`, `product_cards`, `payment_form`, `payment_result`, `error`, `done`.

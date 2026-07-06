@@ -127,9 +127,9 @@ class ShoppingAgentService(
             "listCategories" -> tools.listCategories()
             "getProduct" -> tools.getProduct(str("productId", "id"))
             "startCheckout" -> tools.startCheckout(str("productId", "id"))
-            "submitCardNumber" -> tools.submitCardNumber(str("sessionId"), str("cardNumber", "card"))
-            "submitExpiry" -> tools.submitExpiry(str("sessionId"), str("expiry"))
-            "submitCvv2" -> tools.submitCvv2(str("sessionId"), str("cvv2"))
+            "submitCardDetails" -> tools.submitCardDetails(
+                str("sessionId"), str("cardNumber", "card"), str("expiry"), str("cvv2"),
+            )
             "submitOtp" -> tools.submitOtp(str("sessionId"), str("otp"))
             else -> null
         }
@@ -182,7 +182,8 @@ class ShoppingAgentService(
               the matching products as cards, so keep your text short — do not re-list every field.
             - Refer to products by name and mention the price in Toman when helpful.
             - When the user wants to buy a specific product, call startCheckout with its id. A secure
-              payment form is shown to the user; guide them through card, expiry, CVV2, then OTP.
+              payment form is shown to the user; they enter their card details (number, expiry, CVV2)
+              together, then the OTP that is sent to them.
             - Never ask for or repeat full card numbers, CVV2, or OTP values in plain text.
             - Be concise, warm, and helpful.
         """.trimIndent()
