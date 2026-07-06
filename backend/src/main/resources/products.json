@@ -1,0 +1,222 @@
+[
+  {
+    "id": "elec-001",
+    "name": "Aurora Wireless Headphones",
+    "description": "Over-ear Bluetooth headphones with active noise cancellation and 30-hour battery life.",
+    "category": "electronics",
+    "priceRial": 42000000,
+    "imageUrl": "https://picsum.photos/seed/elec-001/400/300",
+    "stock": 24,
+    "rating": 4.6,
+    "attributes": { "color": "Matte Black", "battery": "30h", "connectivity": "Bluetooth 5.3" }
+  },
+  {
+    "id": "elec-002",
+    "name": "Pulse Smartwatch 2",
+    "description": "Fitness smartwatch with heart-rate, SpO2, GPS and a bright AMOLED display.",
+    "category": "electronics",
+    "priceRial": 58000000,
+    "imageUrl": "https://picsum.photos/seed/elec-002/400/300",
+    "stock": 15,
+    "rating": 4.4,
+    "attributes": { "display": "1.4in AMOLED", "waterproof": "5ATM", "gps": "Yes" }
+  },
+  {
+    "id": "elec-003",
+    "name": "NovaBook Air 14",
+    "description": "Lightweight 14-inch laptop with a fast SSD, all-day battery and aluminium body.",
+    "category": "electronics",
+    "priceRial": 480000000,
+    "imageUrl": "https://picsum.photos/seed/elec-003/400/300",
+    "stock": 7,
+    "rating": 4.7,
+    "attributes": { "ram": "16GB", "storage": "512GB SSD", "screen": "14in" }
+  },
+  {
+    "id": "elec-004",
+    "name": "SoundCube Mini Speaker",
+    "description": "Pocket-sized waterproof Bluetooth speaker with surprisingly big bass.",
+    "category": "electronics",
+    "priceRial": 18500000,
+    "imageUrl": "https://picsum.photos/seed/elec-004/400/300",
+    "stock": 40,
+    "rating": 4.2,
+    "attributes": { "waterproof": "IP67", "battery": "12h", "color": "Teal" }
+  },
+  {
+    "id": "elec-005",
+    "name": "ClearView 4K Webcam",
+    "description": "4K UHD webcam with autofocus and dual noise-cancelling microphones.",
+    "category": "electronics",
+    "priceRial": 29000000,
+    "imageUrl": "https://picsum.photos/seed/elec-005/400/300",
+    "stock": 0,
+    "rating": 4.1,
+    "attributes": { "resolution": "4K", "fov": "90deg", "mic": "Dual" }
+  },
+  {
+    "id": "fash-001",
+    "name": "Everyday Denim Jacket",
+    "description": "Classic mid-wash denim jacket with a relaxed fit for all seasons.",
+    "category": "fashion",
+    "priceRial": 32000000,
+    "imageUrl": "https://picsum.photos/seed/fash-001/400/300",
+    "stock": 30,
+    "rating": 4.3,
+    "attributes": { "material": "100% Cotton", "fit": "Relaxed", "color": "Mid Blue" }
+  },
+  {
+    "id": "fash-002",
+    "name": "Trailblazer Running Shoes",
+    "description": "Breathable running shoes with responsive cushioning for daily miles.",
+    "category": "fashion",
+    "priceRial": 45000000,
+    "imageUrl": "https://picsum.photos/seed/fash-002/400/300",
+    "stock": 22,
+    "rating": 4.5,
+    "attributes": { "type": "Road", "drop": "8mm", "color": "Graphite" }
+  },
+  {
+    "id": "fash-003",
+    "name": "Merino Wool Beanie",
+    "description": "Soft, warm merino wool beanie that resists odours and itch.",
+    "category": "fashion",
+    "priceRial": 9500000,
+    "imageUrl": "https://picsum.photos/seed/fash-003/400/300",
+    "stock": 60,
+    "rating": 4.0,
+    "attributes": { "material": "Merino Wool", "color": "Charcoal" }
+  },
+  {
+    "id": "fash-004",
+    "name": "Voyager Leather Belt",
+    "description": "Full-grain leather belt with a brushed metal buckle.",
+    "category": "fashion",
+    "priceRial": 14000000,
+    "imageUrl": "https://picsum.photos/seed/fash-004/400/300",
+    "stock": 18,
+    "rating": 4.2,
+    "attributes": { "material": "Full-grain leather", "width": "35mm", "color": "Brown" }
+  },
+  {
+    "id": "fash-005",
+    "name": "Aurora Silk Scarf",
+    "description": "Hand-finished silk scarf with a watercolour-inspired print.",
+    "category": "fashion",
+    "priceRial": 21000000,
+    "imageUrl": "https://picsum.photos/seed/fash-005/400/300",
+    "stock": 12,
+    "rating": 4.6,
+    "attributes": { "material": "100% Silk", "size": "90x90cm" }
+  },
+  {
+    "id": "home-001",
+    "name": "BrewMaster Drip Coffee Maker",
+    "description": "12-cup programmable drip coffee maker with a reusable filter.",
+    "category": "home",
+    "priceRial": 38000000,
+    "imageUrl": "https://picsum.photos/seed/home-001/400/300",
+    "stock": 16,
+    "rating": 4.4,
+    "attributes": { "capacity": "12 cups", "programmable": "Yes", "color": "Stainless" }
+  },
+  {
+    "id": "home-002",
+    "name": "CloudSoft Duvet",
+    "description": "All-season microfibre duvet that is light, warm and machine washable.",
+    "category": "home",
+    "priceRial": 52000000,
+    "imageUrl": "https://picsum.photos/seed/home-002/400/300",
+    "stock": 10,
+    "rating": 4.3,
+    "attributes": { "size": "Queen", "fill": "Microfibre", "tog": "10.5" }
+  },
+  {
+    "id": "home-003",
+    "name": "Verde Ceramic Planter Set",
+    "description": "Set of three minimalist ceramic planters with bamboo drainage trays.",
+    "category": "home",
+    "priceRial": 16500000,
+    "imageUrl": "https://picsum.photos/seed/home-003/400/300",
+    "stock": 34,
+    "rating": 4.5,
+    "attributes": { "pieces": "3", "material": "Ceramic", "color": "Sage" }
+  },
+  {
+    "id": "home-004",
+    "name": "ChefEdge Knife Block",
+    "description": "5-piece stainless steel knife set with an acacia wood block.",
+    "category": "home",
+    "priceRial": 61000000,
+    "imageUrl": "https://picsum.photos/seed/home-004/400/300",
+    "stock": 8,
+    "rating": 4.6,
+    "attributes": { "pieces": "5", "steel": "German", "block": "Acacia" }
+  },
+  {
+    "id": "home-005",
+    "name": "Lumen LED Desk Lamp",
+    "description": "Dimmable LED desk lamp with wireless charging base and USB port.",
+    "category": "home",
+    "priceRial": 24500000,
+    "imageUrl": "https://picsum.photos/seed/home-005/400/300",
+    "stock": 27,
+    "rating": 4.2,
+    "attributes": { "charging": "Qi Wireless", "modes": "5", "color": "White" }
+  },
+  {
+    "id": "book-001",
+    "name": "The Pragmatic Programmer",
+    "description": "Timeless, practical advice on the craft of software development.",
+    "category": "books",
+    "priceRial": 12000000,
+    "imageUrl": "https://picsum.photos/seed/book-001/400/300",
+    "stock": 50,
+    "rating": 4.8,
+    "attributes": { "author": "Hunt & Thomas", "format": "Paperback", "pages": "352" }
+  },
+  {
+    "id": "book-002",
+    "name": "Clean Architecture",
+    "description": "A craftsman's guide to software structure and design principles.",
+    "category": "books",
+    "priceRial": 11000000,
+    "imageUrl": "https://picsum.photos/seed/book-002/400/300",
+    "stock": 45,
+    "rating": 4.7,
+    "attributes": { "author": "Robert C. Martin", "format": "Paperback", "pages": "432" }
+  },
+  {
+    "id": "book-003",
+    "name": "Kotlin in Action, 2nd Edition",
+    "description": "A comprehensive, example-driven guide to modern Kotlin.",
+    "category": "books",
+    "priceRial": 15500000,
+    "imageUrl": "https://picsum.photos/seed/book-003/400/300",
+    "stock": 20,
+    "rating": 4.6,
+    "attributes": { "author": "Isakova et al.", "format": "Paperback", "pages": "560" }
+  },
+  {
+    "id": "book-004",
+    "name": "Atomic Habits",
+    "description": "An easy and proven way to build good habits and break bad ones.",
+    "category": "books",
+    "priceRial": 9800000,
+    "imageUrl": "https://picsum.photos/seed/book-004/400/300",
+    "stock": 65,
+    "rating": 4.8,
+    "attributes": { "author": "James Clear", "format": "Hardcover", "pages": "320" }
+  },
+  {
+    "id": "book-005",
+    "name": "The Midnight Library",
+    "description": "A novel about the infinite possibilities of the lives we could live.",
+    "category": "books",
+    "priceRial": 8500000,
+    "imageUrl": "https://picsum.photos/seed/book-005/400/300",
+    "stock": 38,
+    "rating": 4.3,
+    "attributes": { "author": "Matt Haig", "format": "Paperback", "pages": "304" }
+  }
+]
