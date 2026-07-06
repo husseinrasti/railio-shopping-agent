@@ -9,6 +9,14 @@ function uid(): string {
     : Math.random().toString(36).slice(2);
 }
 
+/** Controls the in-flight chat request so a new send or reset can cancel it. */
+let activeController: AbortController | null = null;
+
+/** True when the error was caused by aborting the request (not a real failure). */
+function isAbort(e: unknown): boolean {
+  return e instanceof DOMException ? e.name === 'AbortError' : (e as Error)?.name === 'AbortError';
+}
+
 interface ChatStore {
   messages: ChatMessage[];
   sessionId: string | null;
@@ -26,6 +34,11 @@ export const useChatStore = create<ChatStore>((set, get) => ({
 
   async sendMessage(text: string) {
     if (get().isStreaming || !text.trim()) return;
+
+    // Cancel any lingering request before starting a new one.
+    activeController?.abort();
+    const controller = new AbortController();
+    activeController = controller;
 
     const userMsg: ChatMessage = {
       id: uid(),
@@ -49,8 +62,11 @@ export const useChatStore = create<ChatStore>((set, get) => ({
       }));
 
     try {
-      for await (const event of streamChat(text, get().sessionId, (id) =>
-        set({ sessionId: id }),
+      for await (const event of streamChat(
+        text,
+        get().sessionId,
+        (id) => set({ sessionId: id }),
+        controller.signal,
       )) {
         switch (event.type) {
           case 'token':
@@ -82,11 +98,15 @@ export const useChatStore = create<ChatStore>((set, get) => ({
         }
       }
     } catch (e) {
-      patch((parts) => [
-        ...parts,
-        { kind: 'text', text: `⚠️ Connection error: ${(e as Error).message}` },
-      ]);
+      // An aborted request (new send or reset) is not an error to show.
+      if (!isAbort(e)) {
+        patch((parts) => [
+          ...parts,
+          { kind: 'text', text: `⚠️ Connection error: ${(e as Error).message}` },
+        ]);
+      }
     } finally {
+      if (activeController === controller) activeController = null;
       set({ isStreaming: false });
     }
   },
@@ -119,6 +139,8 @@ export const useChatStore = create<ChatStore>((set, get) => ({
   },
 
   reset() {
+    activeController?.abort();
+    activeController = null;
     set({ messages: [], sessionId: null, isStreaming: false });
   },
 }));
