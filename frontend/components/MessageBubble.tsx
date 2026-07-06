@@ -19,8 +19,8 @@ export function MessageBubble({ message }: Props) {
     sendMessage(`I'd like to buy ${product.name} (${product.id}).`);
 
   return (
-    <div className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
-      <div className={`flex max-w-[85%] flex-col gap-2 ${isUser ? 'items-end' : 'items-start'}`}>
+    <div className={`flex min-w-0 ${isUser ? 'justify-end' : 'justify-start'}`}>
+      <div className={`flex min-w-0 max-w-[85%] flex-col gap-2 ${isUser ? 'items-end' : 'items-start'}`}>
         {message.parts.map((part, i) => {
           switch (part.kind) {
             case 'text':
@@ -38,7 +38,7 @@ export function MessageBubble({ message }: Props) {
               );
             case 'products':
               return (
-                <div key={i} className="scroll-thin flex gap-3 overflow-x-auto pb-1">
+                <div key={i} className="scroll-thin flex w-full min-w-0 max-w-full gap-3 overflow-x-auto pb-1">
                   {part.products.map((p) => (
                     <ProductCard key={p.id} product={p} onBuy={buy} disabled={isStreaming} />
                   ))}
