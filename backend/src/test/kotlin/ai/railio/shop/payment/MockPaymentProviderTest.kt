@@ -23,6 +23,7 @@ class MockPaymentProviderTest {
         mockOtp = "12345",
         agentSecret = "s",
         corsOrigins = listOf("http://localhost:3000"),
+        unloadModelAfterResponse = false,
     )
 
     private fun provider() = MockPaymentProvider(config)
