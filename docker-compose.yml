@@ -1,0 +1,57 @@
+# Full local stack: Ollama (LLM) + Kotlin backend + Next.js frontend.
+# Copy .env.example to .env first; values below fall back to sane defaults.
+services:
+  ollama:
+    image: ollama/ollama:latest
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-models:/root/.ollama
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  # One-shot: pulls the configured model, then exits.
+  ollama-pull:
+    image: ollama/ollama:latest
+    depends_on:
+      ollama:
+        condition: service_healthy
+    environment:
+      OLLAMA_HOST: http://ollama:11434
+    entrypoint: ["/bin/sh", "-c", "ollama pull ${LLM_MODEL:-qwen2.5:7b}"]
+    restart: "no"
+
+  backend:
+    build:
+      context: ./backend
+    depends_on:
+      ollama-pull:
+        condition: service_completed_successfully
+    environment:
+      LLM_PROVIDER: ${LLM_PROVIDER:-ollama}
+      LLM_MODEL: ${LLM_MODEL:-qwen2.5:7b}
+      OLLAMA_BASE_URL: http://ollama:11434
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      MOCK_OTP: ${MOCK_OTP:-12345}
+      AGENT_SECRET: ${AGENT_SECRET:-dev-secret-change-me}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000}
+      PORT: 8080
+    ports:
+      - "8080:8080"
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8080}
+    depends_on:
+      - backend
+    ports:
+      - "3000:3000"
+
+volumes:
+  ollama-models:
