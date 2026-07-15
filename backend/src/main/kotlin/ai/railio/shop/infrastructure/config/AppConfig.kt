@@ -23,7 +23,7 @@ enum class LlmProvider(val id: String) {
  * lives in `.env` / `.env.example`.
  *
  * @property llmProvider which [LlmProvider] to use.
- * @property llmModel model id (e.g. `qwen2.5-coder:14b` for Ollama, `gpt-4o` for OpenAI).
+ * @property llmModel model id (e.g. `gemma4:12b` for Ollama, `gpt-4o` for OpenAI).
  * @property ollamaBaseUrl base URL of the Ollama server.
  * @property openAiApiKey API key when [llmProvider] is OpenAI; may be blank otherwise.
  * @property mockOtp the OTP the mock payment provider accepts.
@@ -46,7 +46,7 @@ data class AppConfig(
             fun env(key: String, default: String) = getenv(key)?.takeIf { it.isNotBlank() } ?: default
             return AppConfig(
                 llmProvider = LlmProvider.from(getenv("LLM_PROVIDER")),
-                llmModel = env("LLM_MODEL", "qwen2.5-coder:14b"),
+                llmModel = env("LLM_MODEL", "gemma4:12b"),
                 ollamaBaseUrl = env("OLLAMA_BASE_URL", "http://localhost:11434"),
                 openAiApiKey = env("OPENAI_API_KEY", ""),
                 mockOtp = env("MOCK_OTP", "12345"),
